@@ -2,11 +2,11 @@ import tensorflow as tf
 import collections
 
 
-def get_linear_activation():
+def get_linear_activation(dimension = 10):
 	
 	def linear_activation(values):
 
-		zeros = tf.zeros([10])
+		zeros = tf.zeros([dimension])
 		return tf.nn.bias_add(values, zeros, data_format=None, name=None)
 
 	return linear_activation
@@ -21,6 +21,8 @@ class Perceptron():
 				activation_function = tf.sigmoid
 		"""
 
+		activation_function = get_linear_activation(output_dim) if activation_function == None else activation_function
+
 		self.weights = tf.Variable(tf.zeros([input_dim, output_dim]))
 		self.bias = tf.Variable(tf.random_normal([output_dim]))
 
@@ -32,13 +34,14 @@ class Perceptron():
 
 		return self.activation_function(tf.matmul(data, self.weights) + self.bias)
 
+
 class Layer():
 	def __init__(self,*,cell_factory, number_of_cells):
 		self.cells = [cell_factory() for i in range(number_of_cells)]
 
 	def output(self,data):
 		outputs = [cell.output(data) for cell in self.cells]
-		return tf.concat(1,outputs)
+		return tf.concat(axis = 1,values = outputs)
 
 
 class Network():
