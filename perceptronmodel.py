@@ -58,13 +58,18 @@ class Network():
 
 
 
-		self.x = tf.placeholder(tf.float32, [None, dim_of_input])
+		#self.x = tf.placeholder(tf.float32, [None, dim_of_input])
 
-		output_of_last_layer = self.x
+	def output(self,data)
+
+		output_of_last_layer = data
 		for layer in self.layers:
 			output_of_last_layer = layer.output(output_of_last_layer)
 
-		self.y = tf.nn.softmax(output_of_last_layer)
+		return tf.nn.softmax(output_of_last_layer)
+
+	def evaluation(self,data):
+		pass
 
 	def _create_layers(self,layer_sizes,dim_of_input):
 
