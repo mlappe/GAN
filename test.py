@@ -27,6 +27,9 @@ with tf.Session() as sess:
 		
 	print(sess.run(c,feed_dict = {b : [1,2,3]}))
 
+
+	print(sess.run(tf.random_normal([3])))
+
 	
 
 	
