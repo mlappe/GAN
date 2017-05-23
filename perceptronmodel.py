@@ -129,12 +129,23 @@ class Network():
 
 if __name__ == "__main__":
 
-	logging.basicConfig(level=logging.WARN)
+	logging.basicConfig(level=logging.INFO)
 
 	from hypothesis import given
 	import hypothesis.strategies as strategy
 
 	import numpy
+
+	import argparse
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument("--test", help="run tests", action="store_true")
+
+	args = parser.parse_args()
+
+	run_tests = args.test
+
+	logger.info(str(args))
 
 	
 
@@ -200,7 +211,6 @@ if __name__ == "__main__":
 			data = [[1],[2],[3]]
 			labels = [[0],[0],[1]]
 			v = network.evaluate(data,sess)
-			print(v)
 
 			for i in range(5000):
 
@@ -214,9 +224,13 @@ if __name__ == "__main__":
 
 
 
-
-	test_network1()
-	test_network2()
+	if run_tests:
+		logger.info("running tests")
+		test_network1()
+		test_network2()
+		logger.info("all tests successfull")
+	else:
+		logger.info("skipping tests")
 
 
 		
