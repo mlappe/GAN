@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+        <meta property="og:image" content="http://wiseodd.github.io/img/code.png">
+    
+
+    <meta property="og:description" content="Let's try to implement Generative Adversarial Nets (GAN), first introduced by Goodfellow et al, 2014, with TensorFlow. We'll use MNIST data to train the GAN!">
+
+    <title>Generative Adversarial Nets in TensorFlow - Agustinus Kristiadi's Blog</title>
+
+    <link rel="shortcut icon" type="image/png" href="http://wiseodd.github.io/favicon.png">
+
+    <link rel="canonical" href="http://wiseodd.github.io/techblog/2016/09/17/gan-tensorflow/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/bootstrap.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/clean-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/font-awesome.css" rel="stylesheet" type="text/css">
+    <link href="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/css.css" rel="stylesheet" type="text/css">
+    <link href="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/css_002.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    
+        <script async="" src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/analytics.js"></script><script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-77668619-1', 'auto');
+            ga('send', 'pageview');
+        </script>
+    
+
+<script type="text/javascript" async="" src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/embed.js"></script><style>@media print {#ghostery-purple-box {display:none !important}}</style></head>
+
+
+<body>
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top is-fixed" style="background: black; border: none;">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://wiseodd.github.io/">Agustinus Kristiadi's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                
+
+                
+                    
+                        <li>
+                            <a href="http://wiseodd.github.io/techblog/">Tech Blog</a>
+                        </li>
+                    
+                
+                    
+                        <li>
+                            <a href="http://wiseodd.github.io/travelblog/">Travel Blog</a>
+                        </li>
+                    
+                
+                    
+                        <li>
+                            <a href="http://wiseodd.github.io/portfolio/">Portfolio</a>
+                        </li>
+                    
+                
+                    
+                        <li>
+                            <a href="http://wiseodd.github.io/contact/">Contact</a>
+                        </li>
+                    
+                
+                    
+                        <li>
+                            <a href="http://wiseodd.github.io/about/">About</a>
+                        </li>
+                    
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<!--<header class="intro-header" style="position: relative; background-image: url('/img/code.png');">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <h1>Generative Adversarial Nets in TensorFlow</h1>
+                    
+                    <h2 class="subheading">Let's try to implement Generative Adversarial Nets (GAN), first introduced by Goodfellow et al, 2014, with TensorFlow. We'll use MNIST data to train the GAN!</h2>
+                    
+                    <span class="meta">Posted by wiseodd on September 17, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>-->
+
+<!--<header>
+    <div class="container">
+
+    </div>
+</header>-->
+
+<!-- Post Content -->
+<article style="padding-top: 125px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post">
+                    <h1 style="text-align: center; font-size: 36px; padding-bottom: 50px;">Generative Adversarial Nets in TensorFlow</h1>
+                    <p>Generative Adversarial Nets, or GAN in short, is a quite popular neural net. It was first introduced in a <a href="http://papers.nips.cc/paper/5423-generative-adversarial-nets.pdf">NIPS 2014 paper by Ian Goodfellow, et al</a>.
+ This paper literally sparked a lot of interest in adversarial training 
+of neural net, proved by the number of citation of the paper. Suddenly, 
+many flavors of GAN came up: DCGAN, Sequence-GAN, LSTM-GAN, etc. In NIPS
+ 2016, there will even be <a href="https://sites.google.com/site/nips2016adversarial/">a whole workshop</a> dedicated for adversarial training!</p>
+
+<p>Note, the code is available in <a href="https://github.com/wiseodd/generative-models">https://github.com/wiseodd/generative-models</a>.</p>
+
+<p>First, let’s review the main points about the paper. After that, as 
+always, we will try to implement GAN using TensorFlow, with MNIST data.</p>
+
+<h2 class="section-heading">Generative Adversarial Nets</h2>
+
+<p>Let’s consider the rosy relationship between a money conterfeiting 
+criminal and a cop. What’s the objective of the criminal and what’s the 
+objective of the cop in term of counterfeited money? Let’s enumerate:</p>
+
+<ul>
+  <li>To be a successful money counterfeiter, the criminal wants to fool
+ the cop, so that the cop can’t tell the difference between 
+counterfeited money and real money</li>
+  <li>To be a paragon of justice, the cop wants to detect counterfeited money as good as possible</li>
+</ul>
+
+<p>There, we see we have a clash of interest. This kind of situation 
+could be modeled as a minimax game in Game Theory. And this process is 
+called Adversarial Process.</p>
+
+<p>Generative Adversarial Nets (GAN), is a special case of Adversarial 
+Process where the components (the cop and the criminal) are neural net. 
+The first net generates data, and the second net tries to tell the 
+difference between the real data and the fake data generated by the 
+first net. The second net will output a scalar <code class="highlighter-rouge">[0, 1]</code> which represents a probability of real data.</p>
+
+<p>In GAN, the first net is called Generator Net \( G(Z) \) and the second net called Discriminator Net \( D(X) \).</p>
+
+<p><img src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/obj.png" alt="GAN Value Function" class="img-responsive"></p>
+
+<p>At the equilibrium point, which is the optimal point in minimax game,
+ the first net will models the real data, and the second net will output
+ probability of 0.5 as the output of the first net = real data.</p>
+
+<p>“BTW why do we interested in training GAN?” might come in mind. It’s 
+because probability distribution of data \( P_{data} \) might be a very 
+complicated distribution and very hard and intractable to infer. So, 
+having a generative machine that could generate samples from \( P_{data}
+ \) without having to deal with nasty probability distribution is very 
+nice. If we have this, then we could use it for another process that 
+require sample from \( P_{data} \) as we could get samples relatively 
+cheaply using the trained Generative Net.</p>
+
+<h2 class="section-heading">GAN Implementation</h2>
+
+<p>By the definition of GAN, we need two nets. This could be anything, 
+be it a sophisticated net like convnet or just a two layer neural net. 
+Let’s be simple first and use a two layer nets for both of them. We’ll 
+use TensorFlow for this purpose.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="c"># Discriminator Net</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">784</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">'X'</span><span class="p">)</span>
+
+<span class="n">D_W1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">xavier_init</span><span class="p">([</span><span class="mi">784</span><span class="p">,</span> <span class="mi">128</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'D_W1'</span><span class="p">)</span>
+<span class="n">D_b1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">128</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'D_b1'</span><span class="p">)</span>
+
+<span class="n">D_W2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">xavier_init</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'D_W2'</span><span class="p">)</span>
+<span class="n">D_b2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'D_b2'</span><span class="p">)</span>
+
+<span class="n">theta_D</span> <span class="o">=</span> <span class="p">[</span><span class="n">D_W1</span><span class="p">,</span> <span class="n">D_W2</span><span class="p">,</span> <span class="n">D_b1</span><span class="p">,</span> <span class="n">D_b2</span><span class="p">]</span>
+
+<span class="c"># Generator Net</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">'Z'</span><span class="p">)</span>
+
+<span class="n">G_W1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">xavier_init</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">128</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'G_W1'</span><span class="p">)</span>
+<span class="n">G_b1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">128</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'G_b1'</span><span class="p">)</span>
+
+<span class="n">G_W2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">xavier_init</span><span class="p">([</span><span class="mi">128</span><span class="p">,</span> <span class="mi">784</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'G_W2'</span><span class="p">)</span>
+<span class="n">G_b2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">784</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">'G_b2'</span><span class="p">)</span>
+
+<span class="n">theta_G</span> <span class="o">=</span> <span class="p">[</span><span class="n">G_W1</span><span class="p">,</span> <span class="n">G_W2</span><span class="p">,</span> <span class="n">G_b1</span><span class="p">,</span> <span class="n">G_b2</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">generator</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">G_h1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">G_W1</span><span class="p">)</span> <span class="o">+</span> <span class="n">G_b1</span><span class="p">)</span>
+    <span class="n">G_log_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">G_h1</span><span class="p">,</span> <span class="n">G_W2</span><span class="p">)</span> <span class="o">+</span> <span class="n">G_b2</span>
+    <span class="n">G_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">G_log_prob</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">G_prob</span>
+
+
+<span class="k">def</span> <span class="nf">discriminator</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">D_h1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">D_W1</span><span class="p">)</span> <span class="o">+</span> <span class="n">D_b1</span><span class="p">)</span>
+    <span class="n">D_logit</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">D_h1</span><span class="p">,</span> <span class="n">D_W2</span><span class="p">)</span> <span class="o">+</span> <span class="n">D_b2</span>
+    <span class="n">D_prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">D_logit</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">D_prob</span><span class="p">,</span> <span class="n">D_logit</span>
+</code></pre>
+</div>
+
+<p>Above, <code class="highlighter-rouge">generator(z)</code> takes 100-dimensional vector and returns 786-dimensional vector, which is MNIST image (28x28). <code class="highlighter-rouge">z</code> here is the prior for the \( G(Z) \). In a way it learns a mapping between the prior space to \( P_{data} \).</p>
+
+<p>The <code class="highlighter-rouge">discriminator(x)</code> takes MNIST image(s) and return a scalar which represents a probability of real MNIST image.</p>
+
+<p>Now, let’s declare the Adversarial Process for training this GAN. Here’s the training algorithm from the paper:</p>
+
+<p><img src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/algorithm.png" alt="GAN Algorithm" class="img-responsive"></p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">G_sample</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+<span class="n">D_real</span><span class="p">,</span> <span class="n">D_logit_real</span> <span class="o">=</span> <span class="n">discriminator</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="n">D_fake</span><span class="p">,</span> <span class="n">D_logit_fake</span> <span class="o">=</span> <span class="n">discriminator</span><span class="p">(</span><span class="n">G_sample</span><span class="p">)</span>
+
+<span class="n">D_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">D_real</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">D_fake</span><span class="p">))</span>
+<span class="n">G_loss</span> <span class="o">=</span> <span class="o">-</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">D_fake</span><span class="p">))</span>
+</code></pre>
+</div>
+
+<p>Above, we use negative sign for the loss functions because they need 
+to be maximized, whereas TensorFlow’s optimizer can only do 
+minimization.</p>
+
+<p>Also, as per the paper’s suggestion, it’s better to maximize <code class="highlighter-rouge">tf.reduce_mean(tf.log(D_fake))</code> instead of minimizing <code class="highlighter-rouge">tf.reduce_mean(1 - tf.log(D_fake))</code> in the algorithm above.</p>
+
+<p>Then we train the networks one by one with those Adversarial Training, represented by those loss functions above.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="c"># Only update D(X)'s parameters, so var_list = theta_D</span>
+<span class="n">D_solver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">()</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">D_loss</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="n">theta_D</span><span class="p">)</span>
+<span class="c"># Only update G(X)'s parameters, so var_list = theta_G</span>
+<span class="n">G_solver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">AdamOptimizer</span><span class="p">()</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">G_loss</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="n">theta_G</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">sample_Z</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="s">'''Uniform prior for G(Z)'''</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">])</span>
+
+<span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000000</span><span class="p">):</span>
+    <span class="n">X_mb</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">mnist</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">next_batch</span><span class="p">(</span><span class="n">mb_size</span><span class="p">)</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">D_loss_curr</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">D_solver</span><span class="p">,</span> <span class="n">D_loss</span><span class="p">],</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">X</span><span class="p">:</span> <span class="n">X_mb</span><span class="p">,</span> <span class="n">Z</span><span class="p">:</span> <span class="n">sample_Z</span><span class="p">(</span><span class="n">mb_size</span><span class="p">,</span> <span class="n">Z_dim</span><span class="p">)})</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">G_loss_curr</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">G_solver</span><span class="p">,</span> <span class="n">G_loss</span><span class="p">],</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="n">Z</span><span class="p">:</span> <span class="n">sample_Z</span><span class="p">(</span><span class="n">mb_size</span><span class="p">,</span> <span class="n">Z_dim</span><span class="p">)})</span>
+</code></pre>
+</div>
+
+<p>And we’re done! We can see the training process by sampling \( G(Z) \) every now and then:</p>
+
+<p><img src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/training.gif" alt="GAN training" class="img-responsive"></p>
+
+<p>We start with random noise and as the training goes on, \( G(Z) \) 
+starts going more and more toward \( P_{data} \). It’s proven by the 
+more and more similar samples generated by \( G(Z) \) compared to MNIST 
+data.</p>
+
+<h2 class="section-heading">Alternative Loss Formulation</h2>
+
+<p>We could formulate the loss function <code class="highlighter-rouge">D_loss</code> and <code class="highlighter-rouge">G_loss</code> using different notion.</p>
+
+<p>Let’s follow our intuition. This is inspired by the post about image completion in <a href="http://bamos.github.io/2016/08/09/deep-completion/">Brandon Amos’ blog</a>.</p>
+
+<p>If we think about it, the <code class="highlighter-rouge">discriminator(X)</code> wants to make all of the outputs to be <code class="highlighter-rouge">1</code>, as per definition, we want to maximize the probability of real data. The <code class="highlighter-rouge">discriminator(G_sample)</code> wants to make all of the outputs to be <code class="highlighter-rouge">0</code>, as again by definition, \( D(G(Z)) \) wants to minimize the probability of fake data.</p>
+
+<p>What about <code class="highlighter-rouge">generator(Z)</code>? It wants to maximize the probability of fake data! It’s the opposite objective of \( D(G(Z)) \)!</p>
+
+<p>Hence, we could formulate the loss as follow.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="c"># Alternative losses:</span>
+<span class="c"># -------------------</span>
+<span class="n">D_loss_real</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">D_logit_real</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">D_logit_real</span><span class="p">)))</span>
+<span class="n">D_loss_fake</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">D_logit_fake</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">D_logit_fake</span><span class="p">)))</span>
+<span class="n">D_loss</span> <span class="o">=</span> <span class="n">D_loss_real</span> <span class="o">+</span> <span class="n">D_loss_fake</span>
+<span class="n">G_loss</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid_cross_entropy_with_logits</span><span class="p">(</span><span class="n">D_logit_fake</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">D_logit_fake</span><span class="p">)))</span>
+</code></pre>
+</div>
+
+<p>We’re using the Logistic Loss, following the notion above. Changing 
+the loss functions won’t affect the GAN we’re training as this is just a
+ different way to think and formulate the problem.</p>
+
+<h2 class="section-heading">Conclusion</h2>
+
+<p>In this post, we looked at Generative Adversarial Network (GAN), 
+which was published by Ian Goodfellow, et al. at NIPS 2014. We looked at
+ the formulation of Adversarial Process and the intuition behind it.</p>
+
+<p>Next, we implemented the GAN with two layer neural net for both the 
+Generator and Discriminator Net. We then follow the algorithm presented 
+in Goodfellow, et al, 2014 to train the GAN.</p>
+
+<p>Lastly, we thought about the different way to think about GAN loss 
+functions. In the alternative loss functions, we think intuitively about
+ the two networks and used Logistic Loss to model the alternative loss 
+functions.</p>
+
+<p>For the full code, head to <a href="https://github.com/wiseodd/generative-models">https://github.com/wiseodd/generative-models</a>!</p>
+
+<h2 class="section-heading">References</h2>
+
+<ul>
+  <li><a href="http://papers.nips.cc/paper/5423-generative-adversarial-nets.pdf">Goodfellow, Ian, et al. “Generative adversarial nets.” Advances in Neural Information Processing Systems. 2014.</a></li>
+  <li><a href="http://bamos.github.io/2016/08/09/deep-completion/">Image Completion with Deep Learning in TensorFlow</a></li>
+</ul>
+
+                </div>
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="http://wiseodd.github.io/travel/2016/09/10/kebab/" data-toggle="tooltip" data-placement="top" title="" data-original-title="The Kebab Bonanza">← Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="http://wiseodd.github.io/techblog/2016/10/13/residual-net/" data-toggle="tooltip" data-placement="top" title="" data-original-title="Residual Net">Next Post →</a>
+                    </li>
+                    
+                </ul>
+
+                <hr>
+
+                
+                    <div id="disqus_thread" class="section"></div>
+                    <script type="text/javascript">
+                        /* * * CONFIGURATION VARIABLES * * */
+                        var disqus_shortname = 'thirdworldnomad';
+
+                        /* * * DON'T EDIT BELOW THIS LINE * * */
+                        (function() {
+                            var dsq = document.createElement('script'); 
+dsq.type = 'text/javascript'; dsq.async = true;
+                            dsq.src = '//' + disqus_shortname + 
+'.disqus.com/embed.js';
+                            (document.getElementsByTagName('head')[0] ||
+ document.getElementsByTagName('body')[0]).appendChild(dsq);
+                        })();
+                    </script>
+                    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+                
+
+            </div>
+        </div>
+    </div>
+</article>
+
+<hr>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    <li>
+                        <a href="http://wiseodd.github.io/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://twitter.com/wiseodd">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://www.facebook.com/agustinus.kristiadi7">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="https://github.com/wiseodd">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">Copyright © Agustinus Kristiadi's Blog 2017</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/bootstrap.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/clean-blog.js"></script>
+
+<script src="Generative%20Adversarial%20Nets%20in%20TensorFlow%20-%20Agustinus%20Kristiadi%27s%20Blog_files/MathJax.js" id=""></script>
+
+
+
+
+
+</body></html>
