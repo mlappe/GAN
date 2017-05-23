@@ -143,7 +143,7 @@ if __name__ == "__main__":
 	def test_network1(data):
 		"""
 		Testing format of output of evaluation
-		no sematic checking
+		no semantic checking
 		"""
 		pass
 
@@ -179,36 +179,43 @@ if __name__ == "__main__":
 
 		is_float = [type(value) == numpy.float32 for sample in result for value in sample]
 		assert all(is_float)
-		print("test passed")
+		logger.debug("test passed")
 
-	test_network1()
-
-
-	network = Network(	layer_sizes 	= [1],
-				dim_of_input 	= 1)
+	
 
 
-	init = tf.global_variables_initializer()
-
-	with tf.Session() as sess:
-		sess.run(init)
-		data = [[1],[2],[3]]
-		labels = [[0],[0],[1]]
-		v = network.evaluate(data,sess)
-		print(v)
-
-		for i in range(5):
-
-			network.train(data,labels,0.5,sess)
+	def test_network2():
+		"""
+		Test whether a single Perceptron learns to learn a  decision boundary between 2 and 3
+		for 1d inputs
+		"""
+		network = Network(	layer_sizes 	= [1],
+					dim_of_input 	= 1)
 
 
+		init = tf.global_variables_initializer()
+
+		with tf.Session() as sess:
+			sess.run(init)
+			data = [[1],[2],[3]]
+			labels = [[0],[0],[1]]
 			v = network.evaluate(data,sess)
 			print(v)
 
+			for i in range(5000):
+
+				network.train(data,labels,0.5,sess)
+
+
+			v = network.evaluate(data,sess)
+			assert v[2] > 0.9
+			assert v[1] < 0.15
+			assert v[0] < 0.15
 
 
 
-
+	test_network1()
+	test_network2()
 
 
 		
