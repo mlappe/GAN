@@ -1,5 +1,8 @@
 import tensorflow as tf
 import collections
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_linear_activation(dimension = 10):
@@ -43,7 +46,7 @@ class Layer():
 	def output(self,data):
 		outputs = [cell.output(data) for cell in self.cells]
 
-		print("layer.out",outputs)
+		logger.debug("\n"+"layer.out" + str(outputs))
 		return tf.concat(axis = 1,values = outputs)
 
 
@@ -70,8 +73,8 @@ class Network():
 		self.learning_rate = tf.placeholder(tf.float32, shape=[])
 		#self.cross_entropy = tf.reduce_mean(-tf.reduce_sum(self.true_y * tf.log(self.y), reduction_indices=[1]))
 
-		print("self.true_y",self.true_y.get_shape().as_list())
-		print("self.y",self.y.get_shape().as_list())
+		logger.debug("\n"+"self.true_y"+str(self.true_y.get_shape().as_list()))
+		logger.debug("\n"+"self.y"+str(self.y.get_shape().as_list()))
 		
 		self.loss = tf.losses.mean_squared_error(labels = self.true_y,predictions = self.y)
 
@@ -83,7 +86,7 @@ class Network():
 		for layer in self.layers:
 			output_of_last_layer = layer.output(output_of_last_layer)
 
-		print("out_last",output_of_last_layer.get_shape().as_list())
+		logger.debug("\n"+"out_last"+str(output_of_last_layer.get_shape().as_list()))
 
 		return output_of_last_layer
 
@@ -125,6 +128,9 @@ class Network():
 
 
 if __name__ == "__main__":
+
+	logging.basicConfig(level=logging.WARN)
+
 
 	network = Network(	layer_sizes 	= [1,2],
 				dim_of_input 	= 1)
