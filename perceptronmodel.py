@@ -131,17 +131,57 @@ if __name__ == "__main__":
 
 	logging.basicConfig(level=logging.WARN)
 
+	from hypothesis import given
+	import hypothesis.strategies as strategy
 
-	network = Network(	layer_sizes 	= [1,2],
-				dim_of_input 	= 1)
+	import numpy
+
+	
 
 
-	init = tf.global_variables_initializer()
+	@given(strategy.data())
+	def test_network1(data):
+		"""
+		Testing format of output of evaluation
+		no sematic checking
+		"""
+		pass
 
-	with tf.Session() as sess:
-		sess.run(init)
-		v = network.evaluate([[1],[2],[1]],sess)
-		print(v)
+		"""definition of input values"""
+
+		dim_of_input 		= data.draw(strategy.integers(min_value=1, max_value=10))
+
+		possible_layersizes	= strategy.integers(min_value=1, max_value=10)
+		layer_sizes 		= data.draw(strategy.lists(elements=possible_layersizes, min_size=1, average_size=None, max_size=5, unique_by=None, unique=False))
+
+		number_of_inputs 	= data.draw(strategy.integers(min_value=1, max_value=10))
+
+		possible_input_fvalues	= strategy.integers(min_value=1, max_value=10)
+		possible_input_vector	= data.draw(strategy.lists(	elements = possible_input_fvalues, 
+									min_size = dim_of_input, 
+									max_size = dim_of_input))
+		input_for_evaluate 	= [possible_input_vector for i in range(number_of_inputs) ]
+
+
+		"""actual test"""
+		network = Network(	layer_sizes 	= layer_sizes,
+					dim_of_input 	= dim_of_input)
+
+
+		init = tf.global_variables_initializer()
+
+		with tf.Session() as sess:
+			sess.run(init)
+			result = network.evaluate(input_for_evaluate,sess)
+
+		assert len(result) == number_of_inputs 
+		assert all([len(sample_features) == layer_sizes[-1] for sample_features in result])
+
+		is_float = [type(value) == numpy.float32 for sample in result for value in sample]
+		assert all(is_float)
+		print("test passed")
+
+	test_network1()
 
 
 	network = Network(	layer_sizes 	= [1],
