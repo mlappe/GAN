@@ -68,7 +68,7 @@ class Layer():
 
 class Network():
 
-	def __init__(self,*,layer_sizes,dim_of_input):
+	def __init__(self,*,layer_sizes,dim_of_input,input_graph = None):
 
 
 
@@ -80,9 +80,11 @@ class Network():
 
 		self._create_layers(layer_sizes,dim_of_input)
 
+		self.dim_of_input = dim_of_input
 
 
-		self.x 		= tf.placeholder(tf.float32, [None, dim_of_input], name = "data")
+
+		self.x 		= tf.placeholder(tf.float32, [None, dim_of_input], name = "data") if input_graph == None else input_graph
 		self.true_y 	= tf.placeholder(tf.float32, [None, dim_of_output])
 		self.y 		= self.output(self.x)
 
@@ -161,8 +163,12 @@ class GAN():
 	def generate(self,data,tf_session):
 		pass
 
-	def train(self,random_seeds,data,learning_rate,tf_session):
+	def train_discriminator(self,random_seeds,data,learning_rate,tf_session):
 		pass
+
+	def train_generator(self,random_seeds,learning_rate,tf_session):
+
+		self.loss = tf.losses.mean_squared_error(labels = self.true_y,predictions = self.y)
 
 
 if __name__ == "__main__":

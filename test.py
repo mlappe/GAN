@@ -30,6 +30,8 @@ with tf.Session() as sess:
 
 	print(sess.run(tf.random_normal([3])))
 
+	sess.run(test()(sess,a))
+
 	
 
 	
