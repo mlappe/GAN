@@ -281,12 +281,13 @@ if __name__ == "__main__":
 
 	@given(strategy.data())
 	def test_theta(data):
-		"""
+		"""tests whether all theta fields return the right amount of variables,doesnt check shape
 		"""
 		network,dim_of_input,layer_sizes ,input_for_evaluate = test_network_setup(data)
 
 		assert type(network.theta) == list
 		assert len(network.theta) == sum(layer_sizes) * 2
+		assert all([type(parameter) == tf.Variable for parameter in network.theta])
 
 
 
