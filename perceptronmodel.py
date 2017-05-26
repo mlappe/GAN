@@ -1,6 +1,7 @@
 import tensorflow as tf
 import collections
 import logging
+from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
@@ -184,18 +185,15 @@ if __name__ == "__main__":
 
 	logger.info(str(args))
 
-	
 
+	Testnetwork = namedtuple("Testnetwork",["Network","dim_of_input","layer_sizes","test_input"])
 
-	@given(strategy.data())
-	def test_network1(data):
+	def test_network_setup(data):
+		"""setup for test
+		returns a network with variable size (actualy a namedtuple) 
+		data is hypothesis.strategy.data()
 		"""
-		Testing format of output of evaluation
-		no semantic checking
-		"""
-		pass
 
-		"""definition of input values"""
 
 		dim_of_input 		= data.draw(strategy.integers(min_value=1, max_value=10))
 
@@ -210,10 +208,30 @@ if __name__ == "__main__":
 									max_size = dim_of_input))
 		input_for_evaluate 	= [possible_input_vector for i in range(number_of_inputs) ]
 
-
-		"""actual test"""
 		network = Network(	layer_sizes 	= layer_sizes,
 					dim_of_input 	= dim_of_input)
+
+		return Testnetwork(network,dim_of_input,layer_sizes ,input_for_evaluate)
+
+
+
+
+
+	@given(strategy.data())
+	def test_network1(data):
+		"""
+		Testing format of output of evaluation
+		no semantic checking
+		"""
+		pass
+
+		"""definition of input values"""
+
+		network,dim_of_input,layer_sizes ,input_for_evaluate = test_network_setup(data)
+		number_of_inputs = len(input_for_evaluate)
+
+
+		"""actual test"""
 
 
 		init = tf.global_variables_initializer()
