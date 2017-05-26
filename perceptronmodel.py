@@ -37,6 +37,12 @@ class Perceptron():
 	def output(self,data):
 
 		return self.activation_function(tf.matmul(data, self.weights) + self.bias)
+	
+	@property
+	def theta(self):
+		"""Returns model parameters
+		"""
+		return [self.weights,self.bias]
 
 
 class Layer():
@@ -48,6 +54,15 @@ class Layer():
 
 		logger.debug("layer.out" + str(outputs))
 		return tf.concat(axis = 1,values = outputs)
+
+
+	@property
+	def theta(self):
+		"""Returns model parameters
+		"""
+		cells = [cell.theta for cell in self.cells]
+		theta = [parameter for cell in cells for parameter in cell]
+		return theta
 
 
 class Network():
@@ -79,6 +94,14 @@ class Network():
 		self.loss = tf.losses.mean_squared_error(labels = self.true_y,predictions = self.y)
 
 		self.train_step = tf.train.GradientDescentOptimizer(learning_rate = self.learning_rate).minimize(self.loss)
+
+	@property
+	def theta(self):
+		"""Returns model parameters
+		"""
+		layer_parameters = [layer.theta for layer in self.layers]
+		theta = [parameter for layer in layer_parameters for parameter in layer]
+		return theta
 
 	def output(self,data):
 
@@ -129,7 +152,15 @@ class Network():
 
 class GAN():
 
-	def __init__(self):
+	def __init__(self,generator,discriminator):
+		
+		self.generator 		= generator
+		self.discriminator 	= discriminator
+
+	def generate(self,data,tf_session):
+		pass
+
+	def train(self,random_seeds,data,learning_rate,tf_session):
 		pass
 
 
@@ -237,6 +268,12 @@ if __name__ == "__main__":
 		logger.info("all tests successfull")
 	else:
 		logger.info("skipping tests")
+
+
+	network = Network(	layer_sizes 	= [1,2],
+					dim_of_input 	= 1)
+
+	print(network.theta)
 
 
 		
