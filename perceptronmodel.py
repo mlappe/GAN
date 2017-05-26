@@ -46,7 +46,7 @@ class Layer():
 	def output(self,data):
 		outputs = [cell.output(data) for cell in self.cells]
 
-		logger.debug("\n"+"layer.out" + str(outputs))
+		logger.debug("layer.out" + str(outputs))
 		return tf.concat(axis = 1,values = outputs)
 
 
@@ -73,8 +73,8 @@ class Network():
 		self.learning_rate = tf.placeholder(tf.float32, shape=[])
 		#self.cross_entropy = tf.reduce_mean(-tf.reduce_sum(self.true_y * tf.log(self.y), reduction_indices=[1]))
 
-		logger.debug("\n"+"self.true_y"+str(self.true_y.get_shape().as_list()))
-		logger.debug("\n"+"self.y"+str(self.y.get_shape().as_list()))
+		logger.debug("self.true_y"+str(self.true_y.get_shape().as_list()))
+		logger.debug("self.y"+str(self.y.get_shape().as_list()))
 		
 		self.loss = tf.losses.mean_squared_error(labels = self.true_y,predictions = self.y)
 
@@ -86,7 +86,7 @@ class Network():
 		for layer in self.layers:
 			output_of_last_layer = layer.output(output_of_last_layer)
 
-		logger.debug("\n"+"out_last"+str(output_of_last_layer.get_shape().as_list()))
+		logger.debug("out_last"+str(output_of_last_layer.get_shape().as_list()))
 
 		return output_of_last_layer
 
@@ -125,6 +125,12 @@ class Network():
 			layers.append(layer)
 		
 		self.layers = layers
+
+
+class GAN():
+
+	def __init__(self):
+		pass
 
 
 if __name__ == "__main__":
