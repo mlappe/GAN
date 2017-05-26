@@ -279,8 +279,20 @@ if __name__ == "__main__":
 
 
 
+	@given(strategy.data())
+	def test_theta(data):
+		"""
+		"""
+		network,dim_of_input,layer_sizes ,input_for_evaluate = test_network_setup(data)
+
+		assert type(network.theta) == list
+		assert len(network.theta) == sum(layer_sizes) * 2
+
+
+
 	if run_tests:
 		logger.info("running tests")
+		test_theta()
 		test_network1()
 		test_network2()
 		logger.info("all tests successfull")
@@ -288,10 +300,7 @@ if __name__ == "__main__":
 		logger.info("skipping tests")
 
 
-	network = Network(	layer_sizes 	= [1,2],
-					dim_of_input 	= 1)
 
-	print(network.theta)
 
 
 		
